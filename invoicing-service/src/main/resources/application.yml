@@ -1,0 +1,27 @@
+server:
+  port: 8082
+spring:
+  cloud:
+    function:
+      definition: ticketBookingConsumer
+    stream:
+      kafka:
+        bindings:
+          ticketBookingConsumer-in-0:
+            consumer:
+              configuration:
+                value.deserializer: com.aquiliz.ticketr.invoicing.messaging.TicketBookingDeserializer
+        binder:
+          brokers: localhost:29092
+      bindings:
+        ticketBookingConsumer-in-0:
+          destination: ticket-booking-topic
+          group: ticket-booking-api
+
+email-sending:
+  enable: ${ENABLE_EMAIL_SENDING:false}
+  smtp:
+    host: ${SMTP_HOST:smtp.mailtrap.io}
+    port: ${SMTP_PORT:25}
+    username: ${SMTP_USERNAME:test}
+    password: ${SMTP_PASSWORD:test}

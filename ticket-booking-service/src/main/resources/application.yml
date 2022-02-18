@@ -1,0 +1,26 @@
+server:
+  port: 8080
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+spring:
+  application:
+    name: ticket-booking-service
+  data:
+    mongodb:
+      authentication-database: admin
+      database: ticket_bookings
+      port: '27017'
+      host: localhost
+      username: ${MONGO_USERNAME:root}
+      password: ${MONGO_PASSWORD:rootpassword}
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:29092
+      bindings:
+        ticket-booking-out-0:
+          destination: ticket-booking-topic
+          group: ticket-booking-api

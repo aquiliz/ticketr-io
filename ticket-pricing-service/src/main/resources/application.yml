@@ -1,0 +1,9 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: pricing-service
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
