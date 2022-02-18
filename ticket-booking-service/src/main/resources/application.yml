@@ -12,7 +12,7 @@ spring:
       authentication-database: admin
       database: ticket_bookings
       port: '27017'
-      host: localhost
+      host: ${MONGO_HOST:localhost}
       username: ${MONGO_USERNAME:root}
       password: ${MONGO_PASSWORD:rootpassword}
   cloud:
