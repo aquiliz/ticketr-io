@@ -14,21 +14,25 @@ The following microservices are in place:
 
 ## How to run the project locally
 
-####Prerequisites: JDK 14, Docker
-- Execute the docker-compose.yml file to start MongoDb, Zookeeper and Kafka:
+#### Prerequisites: JDK 19, Docker
+- Navigate to repository's root (where docker-compose.yml is located) and execute:
 
   **docker-compose up -d**
+  - This will create and start the required docker containers: MongoDB, Kafka, Zookeper
+
 - Start the **service-registry** as a Spring application
 - Start all other services as Spring applications
 
 ## Optional configurations
-The following environment variables can be set for each service to override the default settings
+The following environment variables can be set for each service to override the default settings. Default values are 
+meant to be used only for testing on a local dev environment.
+
+#### 
 
 #### ticket-booking-service
-- MONGO_HOST - MongoDb host. Default: locahost
-- MONGO_USERNAME - the username to connect to MongoDb. Default: root
-- MONGO_PASSWORD - the password to connect to MongoDb. Default: rootpassword
+- MONGO_URI - a [connection string URI](https://www.mongodb.com/docs/manual/reference/connection-string/) for MongoDB. default: mongodb://root:rootpassword@localhost:27017/ticket_bookings?authSource=admin
 - EUREKA_URI - full URL of the Eureka service registry. default: http://localhost:8761/eureka
+- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29092
 
 #### ticket-pricing-service
 - EUREKA_URI - full URL of the Eureka service registry. default: http://localhost:8761/eureka
@@ -40,6 +44,7 @@ The following environment variables can be set for each service to override the 
 - SMTP_PORT - the port of the SMTP server. Default: 25  (mailtrap's default port)
 - SMTP_USERNAME - smtp server's username. Default: test
 - SMTP_PASSWORD - smtp server's password. Default: test
+- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29092
 
 ## Useful tips
 - After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Eeach registered
@@ -48,3 +53,15 @@ The following environment variables can be set for each service to override the 
   - docker exec -it <kafka-container-id> bash
   - cd ../../bin
   - ./kafka-console-consumer --bootstrap-server localhost:9092 --topic ticket-booking-topic --from-beginning
+- Example CURL to make a new plane ticket booking (ticket-booking-service must be up and running, as well as service-registry and pricing-service):
+   ```
+   curl --location --request POST 'http://localhost:8080/booking' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+    "userId": "user123",
+    "originAirport": "SOF",
+    "destinationAirport": "IST",
+    "seat": "25A",
+    "seatClass": "1"
+    }'
+    ```

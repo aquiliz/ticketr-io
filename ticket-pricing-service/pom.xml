@@ -14,7 +14,7 @@
 	<name>ticket-pricing-service</name>
 	<description>Ticket pricing service</description>
 	<properties>
-		<java.version>14</java.version>
+		<java.version>19</java.version>
 		<spring-cloud.version>2021.0.0</spring-cloud.version>
 	</properties>
 	<dependencies>
@@ -57,5 +57,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

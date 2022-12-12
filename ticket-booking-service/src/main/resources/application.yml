@@ -9,17 +9,12 @@ spring:
     name: ticket-booking-service
   data:
     mongodb:
-      authentication-database: admin
-      database: ticket_bookings
-      port: '27017'
-      host: ${MONGO_HOST:localhost}
-      username: ${MONGO_USERNAME:root}
-      password: ${MONGO_PASSWORD:rootpassword}
+      uri: ${MONGO_URI:mongodb://root:rootpassword@localhost:27017/ticket_bookings?authSource=admin}
   cloud:
     stream:
       kafka:
         binder:
-          brokers: localhost:29092
+          brokers: ${KAFKA_URI:localhost:29092}
       bindings:
         ticket-booking-out-0:
           destination: ticket-booking-topic

@@ -12,7 +12,7 @@ spring:
               configuration:
                 value.deserializer: com.aquiliz.ticketr.invoicing.messaging.TicketBookingDeserializer
         binder:
-          brokers: localhost:29092
+          brokers: ${KAFKA_URI:localhost:29092}
       bindings:
         ticketBookingConsumer-in-0:
           destination: ticket-booking-topic
