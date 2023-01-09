@@ -14,14 +14,13 @@ The following microservices are in place:
 
 ## How to run the project locally
 
-#### Prerequisites: JDK 19, Docker
+#### Prerequisites: Docker
 - Navigate to repository's root (where docker-compose.yml is located) and execute:
 
   **docker-compose up -d**
-  - This will create and start the required docker containers: MongoDB, Kafka, Zookeper
-
-- Start the **service-registry** as a Spring application
-- Start all other services as Spring applications
+  - This will create and start all docker containers:
+    - Backing services: MongoDB, Kafka, Zookeper
+    - all Ticketr.io microservices
 
 ## Optional configurations
 The following environment variables can be set for each service to override the default settings. Default values are 
@@ -50,7 +49,7 @@ meant to be used only for testing on a local dev environment.
 - After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Eeach registered
   microservice will be visible there.
 - For debugging purpose, a console consumer can be opened on the Kafka topic (ticket-booking-topic):
-  - docker exec -it <kafka-container-id> bash
+  - docker exec -it ``<kafka-container-id>`` bash
   - cd ../../bin
   - ./kafka-console-consumer --bootstrap-server localhost:9092 --topic ticket-booking-topic --from-beginning
 - Example CURL to make a new plane ticket booking (ticket-booking-service must be up and running, as well as service-registry and pricing-service):

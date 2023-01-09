@@ -1,4 +1,6 @@
-version: '2'
+version: "3.5"
+
+# Part I - backing services #
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -13,13 +15,14 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - 29092:29092
+      - 9092:9092
+      - 29090:29090
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka:9092,LISTENER_EXTERNAL://localhost:29090
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   mongodb:
@@ -29,3 +32,64 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     ports:
       - 27017:27017
+
+  # Part II - Ticketr-io Spring microservices #
+
+  service-registry:
+    image: aquiliz/ticketr-io:service-registry
+    healthcheck:
+      test: "curl --fail --silent service-registry:8761/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    ports:
+      - 8761:8761
+
+  ticket-pricing-service:
+    image: aquiliz/ticketr-io:ticket-pricing-service
+    ports:
+      - 8081:8081
+    environment:
+      EUREKA_URI: http://service-registry:8761/eureka
+    links:
+      - service-registry
+    depends_on:
+      service-registry:
+        condition: service_healthy
+
+  invoicing-service:
+    image: aquiliz/ticketr-io:invoicing-service
+    ports:
+      - 8082:8082
+    environment:
+      KAFKA_URI: kafka:9092
+      EUREKA_URI: http://service-registry:8761/eureka
+    links:
+      - service-registry
+      - kafka
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  ticket-booking-service:
+    image: aquiliz/ticketr-io:ticket-booking-service
+    ports:
+      - 8080:8080
+    environment:
+      EUREKA_URI: http://service-registry:8761/eureka
+      MONGO_URI: mongodb://root:rootpassword@mongodb:27017/ticket_bookings?authSource=admin
+      KAFKA_URI: http://kafka:9092
+      WAIT_HOSTS: mongodb:27017
+    links:
+      - service-registry
+      - mongodb
+      - kafka
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      mongodb:
+        condition: service_started
