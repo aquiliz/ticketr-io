@@ -1,0 +1,62 @@
+# Service registry deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-registry
+  name: service-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-registry
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: service-registry
+    spec:
+      containers:
+        - image: aquiliz/ticketr-io:service-registry
+          name: service-registry
+          ports:
+            - containerPort: 8761
+          env:
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_LIVENESSSTATE_ENABLED
+              value: "true"
+            - name: SERVER_SHUTDOWN
+              value: "graceful"
+          livenessProbe:
+            httpGet:
+              port: 8761
+              path: /actuator/health/liveness
+          readinessProbe:
+            httpGet:
+              port: 8761
+              path: /actuator/health/readiness
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 10" ]
+          resources: {}
+      restartPolicy: Always
+
+# Service registry k8s Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-registry
+  name: service-registry
+spec:
+  ports:
+    - name: "8761"
+      port: 8761
+      targetPort: 8761
+  selector:
+    app: service-registry

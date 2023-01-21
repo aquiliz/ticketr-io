@@ -1,0 +1,64 @@
+# Pricing service deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ticket-pricing-service
+  name: ticket-pricing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-pricing-service
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: ticket-pricing-service
+    spec:
+      containers:
+        - image: aquiliz/ticketr-io:ticket-pricing-service
+          name: ticket-pricing-service
+          ports:
+            - containerPort: 8081
+          env:
+            - name: EUREKA_URI
+              value: http://service-registry:8761/eureka
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_LIVENESSSTATE_ENABLED
+              value: "true"
+            - name: SERVER_SHUTDOWN
+              value: "graceful"
+          livenessProbe:
+            httpGet:
+              port: 8081
+              path: /actuator/health/liveness
+          readinessProbe:
+            httpGet:
+              port: 8081
+              path: /actuator/health/readiness
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 10" ]
+          resources: {}
+      restartPolicy: Always
+status: {}
+# Pricing service k8s Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ticket-pricing-service
+  name: ticket-pricing-service
+spec:
+  ports:
+    - name: "8081"
+      port: 8081
+      targetPort: 8081
+  selector:
+    app: ticket-pricing-service

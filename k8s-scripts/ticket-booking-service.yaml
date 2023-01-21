@@ -1,0 +1,68 @@
+#Ticket booking service deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ticket-booking-service
+  name: ticket-booking-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-booking-service
+  strategy: {}
+  template:
+    metadata:
+      
+      labels:
+        app: ticket-booking-service
+    spec:
+      containers:
+        - image: aquiliz/ticketr-io:ticket-booking-service
+          name: ticket-booking-service
+          ports:
+            - containerPort: 8080
+          env:
+            - name: EUREKA_URI
+              value: http://service-registry:8761/eureka
+            - name: KAFKA_URI
+              value: http://kafka-service:9092
+            - name: MONGO_URI
+              value: mongodb://root:rootpassword@mongodb:27017/ticket_bookings?authSource=admin
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
+              value: "true"
+            - name: MANAGEMENT_HEALTH_LIVENESSSTATE_ENABLED
+              value: "true"
+            - name: SERVER_SHUTDOWN
+              value: "graceful"
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/readiness
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 10" ]
+          resources: {}
+      restartPolicy: Always
+# Ticket booking service k8s Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ticket-booking-service
+  name: ticket-booking-service
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: ticket-booking-service

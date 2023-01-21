@@ -1,0 +1,43 @@
+# MongoDB deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mongodb
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - env:
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: rootpassword
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: root
+          image: mongo
+          name: mongodb
+          ports:
+            - containerPort: 27017
+          resources: {}
+      restartPolicy: Always
+---
+# MongoDB service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  ports:
+    - name: "27017"
+      port: 27017
+      targetPort: 27017
+  selector:
+    app: mongodb
