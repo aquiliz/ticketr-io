@@ -7,6 +7,7 @@ RUN java -Djarmode=layertools -jar application.jar extract
 FROM eclipse-temurin:19-jdk-jammy
 WORKDIR application
 COPY --from=builder application/dependencies/ ./
+COPY --from=builder application/spring-boot-loader/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/application/ ./
 EXPOSE 8761

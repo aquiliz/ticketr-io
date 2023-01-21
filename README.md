@@ -7,20 +7,25 @@ All microservices are placed in the same git repo just for GitHub tidiness. In a
 a separate git repository. 
 
 The following microservices are in place:
-- service-registry - Has to be started first. Registers and coordinates the sync communication.
+- service-registry - Registers and coordinates the sync communication.
 - ticket-booking-service - The entry point. Provides REST API for booking new tickets. Stores them in MongoDb
 - ticket-pricing-service - Calculates the price of the plane ticket depending on numerous factors. Invoked synchronously via REST.
 - invoicing-service - Listens for events for newly booked tickets on the Kafka topic, generates pdf invoice documents and sends them by email to the recipient.
 
 ## How to run the project locally
 
+### Option 1: using Docker compose
 #### Prerequisites: Docker
-- Navigate to repository's root (where docker-compose.yml is located) and execute:
+- From repository's root execute:
+ 
+  ``docker-compose up -d``
 
-  **docker-compose up -d**
-  - This will create and start all docker containers:
-    - Backing services: MongoDB, Kafka, Zookeper
-    - all Ticketr.io microservices
+### Option 2: using Kubernetes
+#### Prerequisites: Kubernetes
+- From repository's root execute:
+
+  ``kubectl apply -f k8s-scripts/``
+
 
 ## Optional configurations
 The following environment variables can be set for each service to override the default settings. Default values are 
@@ -46,7 +51,7 @@ meant to be used only for testing on a local dev environment.
 - KAFKA_URI - host and port of the running Kafka instance. default: localhost:29092
 
 ## Useful tips
-- After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Eeach registered
+- After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Each registered
   microservice will be visible there.
 - For debugging purpose, a console consumer can be opened on the Kafka topic (ticket-booking-topic):
   - docker exec -it ``<kafka-container-id>`` bash
