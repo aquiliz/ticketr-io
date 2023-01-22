@@ -1,0 +1,22 @@
+# This is an example ingress to be used for prod scenarios
+# It requires an ingress controller to be installed and running.
+# Run an ingress controller (such as nginx) and uncomment the next lines
+
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: ticketr-io-ingress
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2
+#spec:
+#  ingressClassName: nginx
+#  rules:
+#    - http:
+#        paths:
+#          - path: /booking(/|$)(.*)
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: ticket-booking-service
+#                port:
+#                  number: 8080

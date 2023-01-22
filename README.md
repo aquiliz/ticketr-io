@@ -25,6 +25,9 @@ The following microservices are in place:
 - From repository's root execute:
 
   ``kubectl apply -f k8s-scripts/``
+- Expose the port of the booking service
+
+  ``kubectl port-forward service/ticket-booking-service 8080:8080``
 
 
 ## Optional configurations
