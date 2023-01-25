@@ -1,9 +1,11 @@
 server:
-  port: 8080
+  port: 8083
 eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
 spring:
   application:
     name: ticket-booking-service
@@ -14,7 +16,7 @@ spring:
     stream:
       kafka:
         binder:
-          brokers: ${KAFKA_URI:localhost:29092}
+          brokers: ${KAFKA_URI:localhost:29090}
       bindings:
         ticket-booking-out-0:
           destination: ticket-booking-topic

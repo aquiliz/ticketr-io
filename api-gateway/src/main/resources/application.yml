@@ -1,0 +1,11 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  main:
+      web-application-type: reactive
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}

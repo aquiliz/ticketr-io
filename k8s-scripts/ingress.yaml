@@ -1,6 +1,8 @@
-# This is an example ingress to be used for prod scenarios
-# It requires an ingress controller to be installed and running.
+# This ingress forwards all incoming requests to the api-gateway to be properly routed
+# Can be used for prod scenarios. It requires an ingress controller to be installed and running.
 # Run an ingress controller (such as nginx) and uncomment the next lines
+# Another way of exposing ticketr-io's API is via 'LoadBalancer' service that uses a cloud
+# provider's load balancer (e.g. ELB on AWS)
 
 #apiVersion: networking.k8s.io/v1
 #kind: Ingress
@@ -13,10 +15,10 @@
 #  rules:
 #    - http:
 #        paths:
-#          - path: /booking(/|$)(.*)
+#          - path: /(.*)
 #            pathType: Prefix
 #            backend:
 #              service:
-#                name: ticket-booking-service
+#                name: api-gateway
 #                port:
 #                  number: 8080

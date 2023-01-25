@@ -1,34 +1,25 @@
-#Ticket booking service deployment
+# api-gateway deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: ticket-booking-service
-  name: ticket-booking-service
+    app: api-gateway
+  name: api-gateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ticket-booking-service
+      app: api-gateway
   strategy: {}
   template:
     metadata:
-      
       labels:
-        app: ticket-booking-service
+        app: api-gateway
     spec:
       containers:
-        - image: aquiliz/ticketr-io:ticket-booking-service
-          name: ticket-booking-service
-          ports:
-            - containerPort: 8083
-          env:
+        - env:
             - name: EUREKA_URI
               value: http://service-registry:8761/eureka
-            - name: KAFKA_URI
-              value: http://kafka-service:9092
-            - name: MONGO_URI
-              value: mongodb://root:rootpassword@mongodb:27017/ticket_bookings?authSource=admin
             - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
               value: "true"
             - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
@@ -37,13 +28,17 @@ spec:
               value: "true"
             - name: SERVER_SHUTDOWN
               value: "graceful"
+          image: aquiliz/ticketr-io:api-gateway
+          name: api-gateway
+          ports:
+            - containerPort: 8080
           livenessProbe:
             httpGet:
-              port: 8083
+              port: 8080
               path: /actuator/health/liveness
           readinessProbe:
             httpGet:
-              port: 8083
+              port: 8080
               path: /actuator/health/readiness
           lifecycle:
             preStop:
@@ -51,18 +46,22 @@ spec:
                 command: [ "sh", "-c", "sleep 10" ]
           resources: {}
       restartPolicy: Always
-# Ticket booking service k8s Service
+status: {}
+
 ---
+# api-gateway Service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: ticket-booking-service
-  name: ticket-booking-service
+    app: api-gateway
+  name: api-gateway
 spec:
   ports:
-    - name: "8083"
-      port: 8083
-      targetPort: 8083
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
   selector:
-    app: ticket-booking-service
+    app: api-gateway
+status:
+  loadBalancer: {}

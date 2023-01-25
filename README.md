@@ -25,9 +25,9 @@ The following microservices are in place:
 - From repository's root execute:
 
   ``kubectl apply -f k8s-scripts/``
-- Expose the port of the booking service
+- Expose the port of the API gateway
 
-  ``kubectl port-forward service/ticket-booking-service 8080:8080``
+  ``kubectl port-forward service/api-gateway 8080:8080``
 
 
 ## Optional configurations
@@ -36,10 +36,13 @@ meant to be used only for testing on a local dev environment.
 
 #### 
 
+#### api-gateway
+- EUREKA_URI - full URL of the Eureka service registry. default: http://localhost:8761/eureka
+
 #### ticket-booking-service
 - MONGO_URI - a [connection string URI](https://www.mongodb.com/docs/manual/reference/connection-string/) for MongoDB. default: mongodb://root:rootpassword@localhost:27017/ticket_bookings?authSource=admin
 - EUREKA_URI - full URL of the Eureka service registry. default: http://localhost:8761/eureka
-- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29092
+- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29090
 
 #### ticket-pricing-service
 - EUREKA_URI - full URL of the Eureka service registry. default: http://localhost:8761/eureka
@@ -51,7 +54,7 @@ meant to be used only for testing on a local dev environment.
 - SMTP_PORT - the port of the SMTP server. Default: 25  (mailtrap's default port)
 - SMTP_USERNAME - smtp server's username. Default: test
 - SMTP_PASSWORD - smtp server's password. Default: test
-- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29092
+- KAFKA_URI - host and port of the running Kafka instance. default: localhost:29090
 
 ## Useful tips
 - After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Each registered
