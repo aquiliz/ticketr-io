@@ -1,6 +1,6 @@
 package com.aquiliz.ticketr.invoicing.messaging;
 
-import com.aquiliz.ticketr.invoicing.TicketBooking;
+import com.aquiliz.ticketr.invoicing.TicketBookingNotification;
 import com.aquiliz.ticketr.invoicing.email.EmailService;
 import com.aquiliz.ticketr.invoicing.pdf.PdfFileService;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 @Component("ticketBookingConsumer")
 @Slf4j
-public class TicketBookingConsumer implements Consumer<TicketBooking> {
+public class TicketBookingConsumer implements Consumer<TicketBookingNotification> {
 
     @Value("${email-sending.enable}")
     private boolean enableEmailSending;
@@ -25,9 +25,9 @@ public class TicketBookingConsumer implements Consumer<TicketBooking> {
     }
 
     @Override
-    public void accept(TicketBooking ticketBooking) {
-        log.info("Received new ticket booking: {}", ticketBooking);
-        File invoiceDocument = pdfFileService.createInvoiceDocument(ticketBooking);
+    public void accept(TicketBookingNotification ticketBookingNotification) {
+        log.info("Received new ticket booking: {}", ticketBookingNotification);
+        File invoiceDocument = pdfFileService.createInvoiceDocument(ticketBookingNotification);
         if (enableEmailSending) {
             emailService.sendInvoiceByEmail(invoiceDocument);
             boolean deleted = invoiceDocument.delete();

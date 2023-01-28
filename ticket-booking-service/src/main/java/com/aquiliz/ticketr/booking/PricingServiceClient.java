@@ -1,14 +1,14 @@
 package com.aquiliz.ticketr.booking;
 
+import com.aquiliz.ticketr.booking.dto.PricingRequest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "pricing-service")
 public interface PricingServiceClient {
-    @GetMapping("/price/{userId}/{seat}/{originAirport}/{destinationAirport}")
-    BigDecimal getPrice(@PathVariable String userId, @PathVariable String seat, @PathVariable String originAirport,
-                        @PathVariable String destinationAirport);
+    @PostMapping("/price")
+    BigDecimal getPrice(@RequestBody PricingRequest pricingRequest) ;
 }

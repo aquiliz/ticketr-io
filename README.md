@@ -7,6 +7,7 @@ All microservices are placed in the same git repo just for GitHub tidiness. In a
 a separate git repository. 
 
 The following microservices are in place:
+- api-gateway - REST API entry point. It routes requests to the responsible microservice and utilizes circuit breaker functionality
 - service-registry - Registers and coordinates the sync communication.
 - ticket-booking-service - The entry point. Provides REST API for booking new tickets. Stores them in MongoDb
 - ticket-pricing-service - Calculates the price of the plane ticket depending on numerous factors. Invoked synchronously via REST.
@@ -60,18 +61,46 @@ meant to be used only for testing on a local dev environment.
 - After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Each registered
   microservice will be visible there.
 - For debugging purpose, a console consumer can be opened on the Kafka topic (ticket-booking-topic):
-  - docker exec -it ``<kafka-container-id>`` bash
-  - cd ../../bin
-  - ./kafka-console-consumer --bootstrap-server localhost:9092 --topic ticket-booking-topic --from-beginning
-- Example CURL to make a new plane ticket booking (ticket-booking-service must be up and running, as well as service-registry and pricing-service):
-   ```
-   curl --location --request POST 'http://localhost:8080/booking' \
-    --header 'Content-Type: application/json' \
-    --data-raw '{
-    "userId": "user123",
-    "originAirport": "SOF",
-    "destinationAirport": "IST",
-    "seat": "25A",
-    "seatClass": "1"
-    }'
+    - docker exec -it ``<kafka-container-id>`` bash
+    - cd ../../bin
+    - ./kafka-console-consumer --bootstrap-server localhost:9092 --topic ticket-booking-topic --from-beginning
+- Example CURL to make a new plane ticket booking:
+    ```
+      curl --location --request POST 'http://localhost:8080/booking' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+        "userId": "user123",
+        "originAirport": "SYD",
+        "destinationAirport": "IST",
+        "passengers": [
+          {
+            "passportNumber": "12345678",
+            "firstName": "John",
+            "lastName": "Doe",
+            "billingPerson": true,
+            "piecesOfCheckedBaggage": 1,
+            "bookedSeats": [
+              {
+                "seatNumber": "25A",
+                "seatClass": "ECONOMY",
+                "flightNumber": "ML556"
+              }
+             ]
+          }
+        ],
+        "flights": [
+          {
+           "flightNumber": "ML556",
+           "scheduledTime": "2023-03-01 12:12:00",
+           "flightOrigin": "SYD",
+           "flightDestination": "KUL"
+          },
+          {
+           "flightNumber": "TK099",
+           "scheduledTime": "2023-03-02 10:00:00",
+           "flightOrigin": "KUL",
+           "flightDestination": "IST"
+          }
+        ]
+        }
     ```

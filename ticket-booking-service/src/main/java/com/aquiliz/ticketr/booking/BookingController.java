@@ -1,5 +1,6 @@
 package com.aquiliz.ticketr.booking;
 
+import com.aquiliz.ticketr.booking.dto.TicketBooking;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +24,17 @@ public class BookingController {
         return ResponseEntity.ok().body(savedBookingId);
     }
 
+    @PutMapping
+    public ResponseEntity<TicketBooking> updateTicket(@RequestBody TicketBooking ticketBooking) {
+        TicketBooking updatedBooking = bookingService.updateBooking(ticketBooking);
+        return ResponseEntity.ok().body(updatedBooking);
+    }
+
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@PathVariable String bookingId) {
         Optional<TicketBooking> booking = bookingService.getBooking(bookingId);
-        return booking.<ResponseEntity<Object>>map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return booking.<ResponseEntity<Object>>map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{bookingId}")
