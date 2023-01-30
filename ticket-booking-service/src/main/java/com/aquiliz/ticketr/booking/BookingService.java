@@ -6,6 +6,7 @@ import com.aquiliz.ticketr.booking.dto.TicketBooking.Status;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public class BookingService {
     private final TicketBookingRepository ticketBookingRepository;
     private final PricingServiceClient pricingServiceClient;
     private final BookingMessageSender bookingMessageSender;
+    private final CircuitBreaker circuitBreaker;
 
     private static final ObjectMapper objectMapper = new ObjectMapper().configure(
         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(
@@ -33,10 +35,11 @@ public class BookingService {
 
     public BookingService(TicketBookingRepository ticketBookingRepository,
         PricingServiceClient pricingServiceClient,
-        BookingMessageSender bookingMessageSender) {
+        BookingMessageSender bookingMessageSender, CircuitBreaker circuitBreaker) {
         this.ticketBookingRepository = ticketBookingRepository;
         this.pricingServiceClient = pricingServiceClient;
         this.bookingMessageSender = bookingMessageSender;
+        this.circuitBreaker = circuitBreaker;
     }
 
     /**
@@ -93,8 +96,10 @@ public class BookingService {
     }
 
     private BigDecimal retrievePrice(TicketBooking ticketBooking) {
-        PricingRequest pricingRequest = objectMapper.convertValue(ticketBooking, PricingRequest.class);
-        BigDecimal currentPrice = pricingServiceClient.getPrice(pricingRequest);
+        PricingRequest pricingRequest = objectMapper.convertValue(ticketBooking,
+            PricingRequest.class);
+        BigDecimal currentPrice = circuitBreaker.executeSupplier(
+            () -> pricingServiceClient.getPrice(pricingRequest));
         log.debug("Fetched price={} for flight orig={} , dest={}, number of passengers={} ",
             currentPrice,
             pricingRequest.getOriginAirport(), pricingRequest.getDestinationAirport(),
