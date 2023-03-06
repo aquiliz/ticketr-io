@@ -1,2 +1,12 @@
 email-sending:
   enable: true
+
+#Workaround needed to stop Kafka AdminClient retrying to connect to a Kafka broker in tests.
+#source: https://github.com/spring-cloud/spring-cloud-stream-binder-kafka/issues/1089#issuecomment-881891123
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers:
+    binding-retry-interval: 31536000 #retry in a year as a of of being able to run the app locally / test without kafka reconnecting

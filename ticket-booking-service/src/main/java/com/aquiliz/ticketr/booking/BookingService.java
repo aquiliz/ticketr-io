@@ -90,7 +90,7 @@ public class BookingService {
         return ticketBookingRepository.findById(bookingId);
     }
 
-    @CacheEvict(value = "bookings", key = "#id")
+    @CacheEvict(value = "bookings", key = "#id", condition = "#id!=null")
     public void deleteBooking(String bookingId) {
         ticketBookingRepository.deleteById(bookingId);
     }
