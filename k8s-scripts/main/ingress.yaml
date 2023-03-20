@@ -1,0 +1,31 @@
+# Run an ingress controller (such as nginx) and uncomment the yaml in this file. To run nginx:
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.6.4/deploy/static/provider/cloud/deploy.yaml
+# Another way of exposing ticketr-io's API is via 'LoadBalancer' service that uses a cloud
+# provider's load balancer (e.g. ELB on AWS)
+
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: ticketr-io-ingress
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+#spec:
+#  rules:
+#    - http:
+#        paths:
+#        # Requests with path starting with 'kibana' are forwarded to kibana service
+#          - path: /(kibana.*)
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: kibana
+#                port:
+#                  number: 5601
+#          # All other requests are forwarded to the API gateway
+#          - path: /()
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: api-gateway
+#                port:
+#                  number: 8080

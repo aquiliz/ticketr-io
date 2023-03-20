@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+      annotations:
+
+    spec:
+      containers:
+        - image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+          name: elasticsearch
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: ingest.geoip.downloader.enabled
+              value: "false"
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch
+spec:
+  ports:
+    - name: 9200-9200
+      port: 9200
+      protocol: TCP
+      targetPort: 9200
+  selector:
+    app: elasticsearch
+  type: ClusterIP

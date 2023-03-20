@@ -1,29 +1,37 @@
-# Pricing service deployment
+#Ticket booking service deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: ticket-pricing-service
-  name: ticket-pricing-service
+    app: ticket-booking-service
+  name: ticket-booking-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ticket-pricing-service
-  strategy: {}
+      app: ticket-booking-service
   template:
     metadata:
       labels:
-        app: ticket-pricing-service
+        app: ticket-booking-service
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs.json-logging/json.keys_under_root: "true"
+        co.elastic.logs.json-logging/json.add_error_key: "true"
+        co.elastic.logs.json-logging/json.message_key: "message"
     spec:
       containers:
-        - image: aquiliz/ticketr-io:ticket-pricing-service
-          name: ticket-pricing-service
+        - image: aquiliz/ticketr-io:ticket-booking-service
+          name: ticket-booking-service
           ports:
-            - containerPort: 8081
+            - containerPort: 8083
           env:
             - name: EUREKA_URI
               value: http://service-registry:8761/eureka
+            - name: KAFKA_URI
+              value: http://kafka-service:9092
+            - name: MONGO_URI
+              value: mongodb://root:rootpassword@mongodb:27017/ticket_bookings?authSource=admin
             - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
               value: "true"
             - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
@@ -34,31 +42,29 @@ spec:
               value: "graceful"
           livenessProbe:
             httpGet:
-              port: 8081
+              port: 8083
               path: /actuator/health/liveness
           readinessProbe:
             httpGet:
-              port: 8081
+              port: 8083
               path: /actuator/health/readiness
           lifecycle:
             preStop:
               exec:
                 command: [ "sh", "-c", "sleep 10" ]
-          resources: {}
       restartPolicy: Always
-status: {}
-# Pricing service k8s Service
+# Ticket booking service k8s Service
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: ticket-pricing-service
-  name: ticket-pricing-service
+    app: ticket-booking-service
+  name: ticket-booking-service
 spec:
   ports:
-    - name: "8081"
-      port: 8081
-      targetPort: 8081
+    - name: "8083"
+      port: 8083
+      targetPort: 8083
   selector:
-    app: ticket-pricing-service
+    app: ticket-booking-service

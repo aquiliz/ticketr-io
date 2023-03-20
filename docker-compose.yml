@@ -24,6 +24,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   mongodb:
     image: mongo:latest
@@ -33,10 +38,37 @@ services:
     ports:
       - 27017:27017
 
-  # Part II - Ticketr-io Spring microservices #
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    ports:
+      - 9200:9200
+    environment:
+      discovery.type: single-node
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.7
+    ports:
+      - 5601:5601
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.9
+    volumes:
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro # Configuration file
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro           # Docker logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro                       # Additional information about containers
+    user: root                                                             # Allow access to log files and docker.sock
+    restart: on-failure
+
+  # Part II - Ticketr.io Spring microservices #
 
   service-registry:
     image: aquiliz/ticketr-io:service-registry
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     healthcheck:
       test: "curl --fail --silent service-registry:8761/actuator/health | grep UP || exit 1"
       interval: 10s
@@ -56,6 +88,9 @@ services:
     depends_on:
       service-registry:
         condition: service_healthy
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     healthcheck:
       test: "curl --fail --silent api-gateway:8080/actuator/health | grep UP || exit 1"
       interval: 10s
@@ -73,6 +108,9 @@ services:
     depends_on:
       service-registry:
         condition: service_healthy
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     healthcheck:
       test: "curl --fail --silent ticket-pricing-service:8081/actuator/health | grep UP || exit 1"
       interval: 10s
@@ -93,7 +131,10 @@ services:
       service-registry:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     healthcheck:
       test: "curl --fail --silent invoicing-service:8082/actuator/health | grep UP || exit 1"
       interval: 10s
@@ -117,9 +158,12 @@ services:
       service-registry:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
       mongodb:
         condition: service_started
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     healthcheck:
       test: "curl --fail --silent ticket-booking-service:8083/actuator/health | grep UP || exit 1"
       interval: 10s

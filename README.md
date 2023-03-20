@@ -25,10 +25,17 @@ The following microservices are in place:
 #### Prerequisites: Kubernetes
 - From repository's root execute:
 
-  ``kubectl apply -f k8s-scripts/``
+  ``kubectl apply -f k8s-scripts/main``
 - Expose the port of the API gateway
 
   ``kubectl port-forward service/api-gateway 8080:8080``
+- (**Optional**) to enable consolidated logging based on Elastic Stack, execute:
+
+  ``kubectl apply -f k8s-scripts/elasticStack``
+
+  ``kubectl port-forward service/kibana 5601:5601``
+
+  You can now access Kibana at: http://localhost:5601/ Create a new index pattern: ``filebeat*`` and explore the logs from all microservices utilizing ElasticSearch's powerful search engine
 
 
 ## Optional configurations

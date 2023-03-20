@@ -1,25 +1,31 @@
-# api-gateway deployment
+# Service registry deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: api-gateway
-  name: api-gateway
+    app: service-registry
+  name: service-registry
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: api-gateway
-  strategy: {}
+      app: service-registry
   template:
     metadata:
       labels:
-        app: api-gateway
+        app: service-registry
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs.json-logging/json.keys_under_root: "true"
+        co.elastic.logs.json-logging/json.add_error_key: "true"
+        co.elastic.logs.json-logging/json.message_key: "message"
     spec:
       containers:
-        - env:
-            - name: EUREKA_URI
-              value: http://service-registry:8761/eureka
+        - image: aquiliz/ticketr-io:service-registry
+          name: service-registry
+          ports:
+            - containerPort: 8761
+          env:
             - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
               value: "true"
             - name: MANAGEMENT_HEALTH_READINESSTATE_ENABLED
@@ -28,40 +34,32 @@ spec:
               value: "true"
             - name: SERVER_SHUTDOWN
               value: "graceful"
-          image: aquiliz/ticketr-io:api-gateway
-          name: api-gateway
-          ports:
-            - containerPort: 8080
           livenessProbe:
             httpGet:
-              port: 8080
+              port: 8761
               path: /actuator/health/liveness
           readinessProbe:
             httpGet:
-              port: 8080
+              port: 8761
               path: /actuator/health/readiness
           lifecycle:
             preStop:
               exec:
                 command: [ "sh", "-c", "sleep 10" ]
-          resources: {}
       restartPolicy: Always
-status: {}
 
+# Service registry k8s Service
 ---
-# api-gateway Service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: api-gateway
-  name: api-gateway
+    app: service-registry
+  name: service-registry
 spec:
   ports:
-    - name: "8080"
-      port: 8080
-      targetPort: 8080
+    - name: "8761"
+      port: 8761
+      targetPort: 8761
   selector:
-    app: api-gateway
-status:
-  loadBalancer: {}
+    app: service-registry
