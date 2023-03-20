@@ -1,4 +1,6 @@
 # ticketr.io
+![ticketr-io-workflow](https://github.com/aquiliz/ticketr-io/actions/workflows/ci.yml/badge.svg)
+
 A cloud-native, microservice-based application for booking plane tickets.
 It demonstrates how several microservices can be wired together using both async and sync means to form
 a cohesive application. It is not a business-ready product, since some aspects depend on the 
