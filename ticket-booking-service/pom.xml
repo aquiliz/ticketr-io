@@ -21,6 +21,7 @@
         <testcontainers.version>1.17.6</testcontainers.version>
         <appache.commons.version>3.12.0</appache.commons.version>
         <logstash.logback.version>7.3</logstash.logback.version>
+        <springdoc.openapi.version>1.7.0</springdoc.openapi.version>
     </properties>
     <dependencies>
         <dependency>
@@ -77,6 +78,11 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

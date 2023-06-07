@@ -67,6 +67,8 @@ meant to be used only for testing on a local dev environment.
 - KAFKA_URI - host and port of the running Kafka instance. default: localhost:29090
 
 ## Useful tips
+- To explore the booking API, open the Swagger UI page of the booking service: http://localhost:8083/swagger-ui/index.html
+    - In addition, the OpenAPI spec file can be viewed at: http://localhost:8083/v3/api-docs/
 - After starting the service registry, Eureka's dashboard can be accessed at: http://localhost:8761/ . Each registered
   microservice will be visible there.
 - For debugging purpose, a console consumer can be opened on the Kafka topic (ticket-booking-topic):
